@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📋 今日计划</title>
+    <title>📋 小朋友的任务清单</title>
     <style>
         * {
             margin: 0;
@@ -30,25 +30,25 @@
             margin-bottom: 10px;
             font-size: 28px;
         }
-        .date {
+        .subtitle {
             text-align: center;
             color: #888;
             margin-bottom: 20px;
-            font-size: 16px;
+            font-size: 14px;
         }
         .nav-tabs {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 20px;
         }
         .nav-tab {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             border: none;
             background: #f0f0f0;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.3s;
         }
         .nav-tab.active {
@@ -235,17 +235,87 @@
         .page.active {
             display: block;
         }
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .day-card {
+            padding: 10px 5px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .day-card:hover {
+            background: #e9ecef;
+        }
+        .day-card.today {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .day-card .day-name {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .day-card .day-date {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .day-card .day-status {
+            font-size: 10px;
+            margin-top: 5px;
+        }
+        .future-list {
+            list-style: none;
+        }
+        .future-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+        }
+        .future-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        .future-date {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .future-tasks {
+            font-size: 14px;
+            color: #888;
+        }
+        .empty-state {
+            text-align: center;
+            color: #888;
+            padding: 40px 20px;
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📋 今日计划</h1>
-        <p class="date">2026 年 03 月 15 日 星期日</p>
+        <h1>📋 小朋友的任务清单</h1>
+        <p class="subtitle" id="currentDate"></p>
         
         <!-- 导航标签 -->
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showPage('today')">今日任务</button>
-            <button class="nav-tab" onclick="showPage('history')">历史记录</button>
+            <button class="nav-tab active" onclick="showPage('today')">今日</button>
+            <button class="nav-tab" onclick="showPage('week')">本周</button>
+            <button class="nav-tab" onclick="showPage('history')">历史</button>
         </div>
         
         <!-- 今日任务页面 -->
@@ -285,6 +355,20 @@
             </div>
         </div>
         
+        <!-- 本周计划页面 -->
+        <div id="week-page" class="page">
+            <h3 style="margin-bottom: 15px; color: #333;">📅 本周计划</h3>
+            <div class="week-grid" id="weekGrid">
+                <!-- 动态生成 -->
+            </div>
+            <div id="weekDetail" style="display: none;">
+                <ul class="task-list" id="weekTaskList">
+                    <!-- 动态生成 -->
+                </ul>
+                <button class="back-btn" onclick="showWeekGrid()">← 返回周视图</button>
+            </div>
+        </div>
+        
         <!-- 历史记录页面 -->
         <div id="history-page" class="page">
             <h3 style="margin-bottom: 15px; color: #333;">📅 历史完成记录</h3>
@@ -310,7 +394,31 @@
             '✍️ 写字课作业',
             '🎮 思维游戏'
         ];
-        const TODAY = '2026-03-15';
+        const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+        // 获取今天日期字符串
+        function getTodayStr() {
+            const today = new Date();
+            return formatDateKey(today);
+        }
+
+        // 格式化日期键
+        function formatDateKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 格式化显示日期
+        function formatDateDisplay(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const weekday = WEEKDAYS[date.getDay()];
+            return `${year}/${month}/${day} ${weekday}`;
+        }
 
         // 获取存储的数据
         function getStorage() {
@@ -323,26 +431,27 @@
             localStorage.setItem('todolistData', JSON.stringify(data));
         }
 
-        // 获取今日任务状态
-        function getTodayState() {
+        // 获取某天任务状态
+        function getDayState(dateStr) {
             const storage = getStorage();
-            if (!storage.days[TODAY]) {
-                storage.days[TODAY] = Array(TASKS.length).fill(false);
+            if (!storage.days[dateStr]) {
+                storage.days[dateStr] = Array(TASKS.length).fill(false);
                 saveStorage(storage);
             }
-            return storage.days[TODAY];
+            return storage.days[dateStr];
         }
 
-        // 保存今日任务状态
-        function saveTodayState(state) {
+        // 保存某天任务状态
+        function saveDayState(dateStr, state) {
             const storage = getStorage();
-            storage.days[TODAY] = state;
+            storage.days[dateStr] = state;
             saveStorage(storage);
         }
 
         // 初始化今日任务
         function initTodayTasks() {
-            const state = getTodayState();
+            const today = getTodayStr();
+            const state = getDayState(today);
             const items = document.querySelectorAll('.task-item');
             items.forEach((item, index) => {
                 if (state[index]) {
@@ -357,7 +466,7 @@
             element.classList.toggle('completed');
             const items = document.querySelectorAll('.task-item');
             const state = Array.from(items).map(item => item.classList.contains('completed'));
-            saveTodayState(state);
+            saveDayState(getTodayStr(), state);
             updateProgress();
             
             if (element.classList.contains('completed')) {
@@ -388,11 +497,87 @@
             if (page === 'today') {
                 document.getElementById('today-page').classList.add('active');
                 document.querySelectorAll('.nav-tab')[0].classList.add('active');
+            } else if (page === 'week') {
+                document.getElementById('week-page').classList.add('active');
+                document.querySelectorAll('.nav-tab')[1].classList.add('active');
+                showWeekGrid();
             } else {
                 document.getElementById('history-page').classList.add('active');
-                document.querySelectorAll('.nav-tab')[1].classList.add('active');
+                document.querySelectorAll('.nav-tab')[2].classList.add('active');
                 showHistoryList();
             }
+        }
+
+        // 显示周视图
+        function showWeekGrid() {
+            document.getElementById('weekDetail').style.display = 'none';
+            const grid = document.getElementById('weekGrid');
+            grid.innerHTML = '';
+            
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                const dateStr = formatDateKey(date);
+                const isToday = dateStr === getTodayStr();
+                const state = getDayState(dateStr);
+                const completed = state.filter(s => s).length;
+                
+                const card = document.createElement('div');
+                card.className = `day-card${isToday ? ' today' : ''}`;
+                card.onclick = () => showDayDetail(dateStr);
+                card.innerHTML = `
+                    <div class="day-name">${WEEKDAYS[date.getDay()]}</div>
+                    <div class="day-date">${date.getDate()}</div>
+                    <div class="day-status">${completed}/${TASKS.length}</div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        // 显示某天详情
+        function showDayDetail(dateStr) {
+            document.getElementById('weekGrid').style.display = 'none';
+            document.getElementById('weekDetail').style.display = 'block';
+            
+            const state = getDayState(dateStr);
+            const taskList = document.getElementById('weekTaskList');
+            taskList.innerHTML = '';
+            
+            document.getElementById('weekDetail').querySelector('h3').textContent = formatDateDisplay(dateStr);
+            
+            state.forEach((done, index) => {
+                const li = document.createElement('li');
+                li.className = `task-item${done ? ' completed' : ''}`;
+                li.onclick = () => toggleWeekTask(dateStr, index, li);
+                li.innerHTML = `
+                    <div class="checkbox"></div>
+                    <span class="task-text">${TASKS[index]}</span>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+
+        // 切换周视图任务
+        function toggleWeekTask(dateStr, index, element) {
+            const state = getDayState(dateStr);
+            state[index] = !state[index];
+            saveDayState(dateStr, state);
+            element.classList.toggle('completed');
+            showWeekGrid();
+            
+            if (state[index]) {
+                createConfetti();
+            }
+        }
+
+        // 返回周视图
+        function showWeekGrid() {
+            document.getElementById('weekDetail').style.display = 'none';
+            document.getElementById('weekGrid').style.display = 'grid';
         }
 
         // 显示历史列表
@@ -405,7 +590,7 @@
             const dates = Object.keys(storage.days).sort().reverse();
             
             if (dates.length === 0) {
-                historyList.innerHTML = '<li style="text-align: center; color: #888; padding: 20px;">暂无历史记录</li>';
+                historyList.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无历史记录</p></div>';
                 return;
             }
             
@@ -419,7 +604,7 @@
                 li.className = 'history-item';
                 li.onclick = () => showHistoryDetail(date);
                 li.innerHTML = `
-                    <div class="history-date">${formatDate(date)}</div>
+                    <div class="history-date">${formatDateDisplay(date)}</div>
                     <div class="history-stats">
                         <span class="completed">✓ 完成 ${completed}/${total}</span>
                         <span>完成率 ${percent}%</span>
@@ -437,7 +622,7 @@
             const storage = getStorage();
             const state = storage.days[date];
             
-            document.getElementById('detailDate').textContent = formatDate(date);
+            document.getElementById('detailDate').textContent = formatDateDisplay(date);
             const tasksDiv = document.getElementById('detailTasks');
             tasksDiv.innerHTML = '';
             
@@ -453,17 +638,6 @@
         function showHistoryList() {
             document.getElementById('historyDetail').style.display = 'none';
             document.getElementById('historyList').style.display = 'block';
-        }
-
-        // 格式化日期
-        function formatDate(dateStr) {
-            const date = new Date(dateStr + 'T00:00:00');
-            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const weekday = weekdays[date.getDay()];
-            return `${year}年${month}月${day}日 ${weekday}`;
         }
 
         // 放烟花
@@ -484,6 +658,7 @@
         }
 
         // 初始化
+        document.getElementById('currentDate').textContent = formatDateDisplay(getTodayStr());
         initTodayTasks();
     </script>
 </body>
