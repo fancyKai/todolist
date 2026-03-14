@@ -138,6 +138,20 @@
             </ul>
         </div>
         
+        <div class="task-group">
+            <h3>📅 星期六</h3>
+            <ul class="task-list">
+                <li>✍️ 写字课</li>
+                <li>🥊 散打课</li>
+                <li>🧸 小熊 app</li>
+                <li>🎬 纪录片一集</li>
+                <li>📚 看中文书</li>
+                <li>🔤 学习拼音</li>
+                <li>🎹 钢琴练习</li>
+                <li>📖 学而思能力书</li>
+            </ul>
+        </div>
+        
         <button onclick="initTasks()">✅ 确认初始化</button>
         
         <div class="success" id="successMsg">
@@ -187,6 +201,16 @@
                 '🥔 土豆逗两集',
                 '💻 英语线上课',
                 '📚 看中文书'
+            ],
+            saturday: [
+                '✍️ 写字课',
+                '🥊 散打课',
+                '🧸 小熊 app',
+                '🎬 纪录片一集',
+                '📚 看中文书',
+                '🔤 学习拼音',
+                '🎹 钢琴练习',
+                '📖 学而思能力书'
             ]
         };
 
@@ -202,11 +226,10 @@
             storage.tasks.wednesday = WEEKDAY_TASKS.wednesday;
             storage.tasks.thursday = WEEKDAY_TASKS.thursday;
             storage.tasks.friday = WEEKDAY_TASKS.friday;
+            storage.tasks.saturday = WEEKDAY_TASKS.saturday;
             
-            // 其他星期初始化为空
-            ['sunday', 'saturday'].forEach(day => {
-                storage.tasks[day] = [];
-            });
+            // 星期日初始化为空
+            storage.tasks.sunday = [];
 
             // 保存到 localStorage
             localStorage.setItem('tudouData', JSON.stringify(storage));
