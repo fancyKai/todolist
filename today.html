@@ -134,41 +134,6 @@
             color: #888;
             font-size: 16px;
         }
-        .week-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-bottom: 20px;
-        }
-        .day-card {
-            padding: 10px 5px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        .day-card:hover {
-            background: #e9ecef;
-        }
-        .day-card.today {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-        .day-card .day-name {
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-        .day-card .day-date {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .day-card .day-status {
-            font-size: 10px;
-            margin-top: 5px;
-        }
         .history-list {
             list-style: none;
             max-height: 400px;
@@ -373,7 +338,6 @@
         <!-- 导航标签 -->
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="showPage('today')">今日</button>
-            <button class="nav-tab" onclick="showPage('week')">本周</button>
             <button class="nav-tab" onclick="showPage('edit')">设置</button>
             <button class="nav-tab" onclick="showPage('history')">历史</button>
         </div>
@@ -392,20 +356,25 @@
             </div>
         </div>
         
-        <!-- 本周计划页面 -->
-        <div id="week-page" class="page">
-            <h3 style="margin-bottom: 15px; color: #333;">📅 本周计划</h3>
-            <div class="week-grid" id="weekGrid">
-                <!-- 动态生成 -->
-            </div>
-            <div id="weekDetail" style="display: none;">
-                <h3 style="margin-bottom: 15px; color: #333;" id="weekDetailTitle"></h3>
-                <ul class="task-list" id="weekTaskList">
-                    <!-- 动态生成 -->
-                </ul>
-                <button class="back-btn" onclick="showWeekGrid()">← 返回周视图</button>
-            </div>
-        </div>
+        // 切换页面
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            
+            if (page === 'today') {
+                document.getElementById('today-page').classList.add('active');
+                document.querySelectorAll('.nav-tab')[0].classList.add('active');
+                initTodayTasks();
+            } else if (page === 'edit') {
+                document.getElementById('edit-page').classList.add('active');
+                document.querySelectorAll('.nav-tab')[1].classList.add('active');
+                showEditPage();
+            } else {
+                document.getElementById('history-page').classList.add('active');
+                document.querySelectorAll('.nav-tab')[2].classList.add('active');
+                showHistoryList();
+            }
+        }
         
         <!-- 设置/编辑页面 -->
         <div id="edit-page" class="page">
@@ -741,82 +710,6 @@
             setTimeout(() => {
                 successDiv.style.display = 'none';
             }, 2000);
-        }
-
-        // 显示周视图
-        function showWeekGrid() {
-            document.getElementById('weekDetail').style.display = 'none';
-            const grid = document.getElementById('weekGrid');
-            grid.innerHTML = '';
-            
-            const todayIndex = new Date().getDay();
-            
-            for (let i = 0; i < 7; i++) {
-                const weekday = WEEKDAYS[i];
-                const tasks = getTasks(weekday);
-                const state = getDayState(weekday);
-                const completed = state.filter(s => s).length;
-                const isToday = i === todayIndex;
-                
-                const card = document.createElement('div');
-                card.className = `day-card${isToday ? ' today' : ''}`;
-                card.onclick = () => showDayDetail(weekday, i);
-                card.innerHTML = `
-                    <div class="day-name">${WEEKDAYS_SHORT[i]}</div>
-                    <div class="day-date">${tasks.length > 0 ? '📋' : '○'}</div>
-                    <div class="day-status">${completed}/${tasks.length}</div>
-                `;
-                grid.appendChild(card);
-            }
-        }
-
-        // 显示某天详情
-        function showDayDetail(weekday, dayIndex) {
-            document.getElementById('weekGrid').style.display = 'none';
-            document.getElementById('weekDetail').style.display = 'block';
-            
-            const tasks = getTasks(weekday);
-            const state = getDayState(weekday);
-            const taskList = document.getElementById('weekTaskList');
-            taskList.innerHTML = '';
-            
-            document.getElementById('weekDetailTitle').textContent = WEEKDAYS_CN[dayIndex];
-            
-            if (tasks.length === 0) {
-                taskList.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>这天还没有任务哦～</p></div>';
-                return;
-            }
-            
-            tasks.forEach((task, index) => {
-                const completed = state[index] || false;
-                const li = document.createElement('li');
-                li.className = `task-item${completed ? ' completed' : ''}`;
-                li.onclick = () => toggleWeekTask(weekday, index, li);
-                li.innerHTML = `
-                    <div class="checkbox"></div>
-                    <span class="task-text">${task}</span>
-                `;
-                taskList.appendChild(li);
-            });
-        }
-
-        // 切换周视图任务
-        function toggleWeekTask(weekday, index, element) {
-            const state = getDayState(weekday);
-            state[index] = !state[index];
-            saveDayState(weekday, state);
-            element.classList.toggle('completed');
-            showWeekGrid();
-            
-            if (state[index]) {
-                createConfetti();
-            }
-        }
-
-        // 返回周视图
-        function showWeekGrid() {
-            document.getElementById('weekDetail').style.display = 'none';
-            document.getElementById('weekGrid').style.display = 'grid';
         }
 
         // 显示历史列表
