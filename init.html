@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 图图的任务清单 - 初始化</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .card {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .task-group {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .task-group h3 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        .task-list {
+            list-style: none;
+            padding-left: 20px;
+        }
+        .task-list li {
+            padding: 5px 0;
+            color: #555;
+        }
+        .task-list li::before {
+            content: '✓';
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .success {
+            text-align: center;
+            padding: 20px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📋 图图的任务清单初始化</h1>
+        
+        <div class="task-group">
+            <h3>📅 星期一</h3>
+            <ul class="task-list">
+                <li>🧩 都都思维</li>
+                <li>📺 英语动画片</li>
+                <li>🥔 土豆逗两集</li>
+                <li>📚 看中文书</li>
+                <li>✍️ 写字课作业</li>
+                <li>🎹 钢琴练习</li>
+            </ul>
+        </div>
+        
+        <button onclick="initTasks()">✅ 确认初始化</button>
+        
+        <div class="success" id="successMsg">
+            🎉 初始化成功！<br>
+            <a href="today.html" style="color: #155724; font-weight: bold;">前往任务清单 →</a>
+        </div>
+    </div>
+
+    <script>
+        const WEEKDAY_TASKS = {
+            monday: [
+                '🧩 都都思维',
+                '📺 英语动画片',
+                '🥔 土豆逗两集',
+                '📚 看中文书',
+                '✍️ 写字课作业',
+                '🎹 钢琴练习'
+            ]
+        };
+
+        function initTasks() {
+            const storage = {
+                tasks: {},
+                history: {}
+            };
+
+            // 初始化星期一的任务
+            storage.tasks.monday = WEEKDAY_TASKS.monday;
+            
+            // 其他星期初始化为空
+            ['sunday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].forEach(day => {
+                storage.tasks[day] = [];
+            });
+
+            // 保存到 localStorage
+            localStorage.setItem('tudouData', JSON.stringify(storage));
+
+            // 显示成功消息
+            document.getElementById('successMsg').style.display = 'block';
+            document.querySelector('button').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
