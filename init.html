@@ -114,6 +114,18 @@
             </ul>
         </div>
         
+        <div class="task-group">
+            <h3>📅 星期四</h3>
+            <ul class="task-list">
+                <li>🧸 小熊 app</li>
+                <li>📺 英语动画片</li>
+                <li>📖 三国演义一集</li>
+                <li>🔤 学习拼音</li>
+                <li>✍️ 写字课作业</li>
+                <li>🎹 钢琴练习</li>
+            </ul>
+        </div>
+        
         <button onclick="initTasks()">✅ 确认初始化</button>
         
         <div class="success" id="successMsg">
@@ -147,6 +159,14 @@
                 '💻 英语线上课',
                 '✍️ 写字课作业',
                 '🎹 钢琴练习'
+            ],
+            thursday: [
+                '🧸 小熊 app',
+                '📺 英语动画片',
+                '📖 三国演义一集',
+                '🔤 学习拼音',
+                '✍️ 写字课作业',
+                '🎹 钢琴练习'
             ]
         };
 
@@ -160,9 +180,10 @@
             storage.tasks.monday = WEEKDAY_TASKS.monday;
             storage.tasks.tuesday = WEEKDAY_TASKS.tuesday;
             storage.tasks.wednesday = WEEKDAY_TASKS.wednesday;
+            storage.tasks.thursday = WEEKDAY_TASKS.thursday;
             
             // 其他星期初始化为空
-            ['sunday', 'thursday', 'friday', 'saturday'].forEach(day => {
+            ['sunday', 'friday', 'saturday'].forEach(day => {
                 storage.tasks[day] = [];
             });
 
