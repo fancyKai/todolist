@@ -152,6 +152,21 @@
             </ul>
         </div>
         
+        <div class="task-group">
+            <h3>📅 星期日</h3>
+            <ul class="task-list">
+                <li>🎹 钢琴课</li>
+                <li>🧩 都都思维</li>
+                <li>🧸 小熊 app</li>
+                <li>📺 英语动画片</li>
+                <li>📝 钢琴书面作业</li>
+                <li>📚 看中文书</li>
+                <li>💻 英语线上课</li>
+                <li>⚽ 户外/运动</li>
+                <li>🎬 纪录片一集</li>
+            </ul>
+        </div>
+        
         <button onclick="initTasks()">✅ 确认初始化</button>
         
         <div class="success" id="successMsg">
@@ -211,6 +226,17 @@
                 '🔤 学习拼音',
                 '🎹 钢琴练习',
                 '📖 学而思能力书'
+            ],
+            sunday: [
+                '🎹 钢琴课',
+                '🧩 都都思维',
+                '🧸 小熊 app',
+                '📺 英语动画片',
+                '📝 钢琴书面作业',
+                '📚 看中文书',
+                '💻 英语线上课',
+                '⚽ 户外/运动',
+                '🎬 纪录片一集'
             ]
         };
 
@@ -227,9 +253,7 @@
             storage.tasks.thursday = WEEKDAY_TASKS.thursday;
             storage.tasks.friday = WEEKDAY_TASKS.friday;
             storage.tasks.saturday = WEEKDAY_TASKS.saturday;
-            
-            // 星期日初始化为空
-            storage.tasks.sunday = [];
+            storage.tasks.sunday = WEEKDAY_TASKS.sunday;
 
             // 保存到 localStorage
             localStorage.setItem('tudouData', JSON.stringify(storage));
