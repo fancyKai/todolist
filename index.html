@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 图图的任务清单</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📋 图图的任务清单</h1>
+        <p class="subtitle" id="todayDisplay"></p>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showPage('today')">今日</button>
+            <button class="nav-tab" onclick="showPage('edit')">设置</button>
+            <button class="nav-tab" onclick="showPage('history')">历史</button>
+        </div>
+        
+        <div id="today-page" class="page active">
+            <ul class="task-list" id="todayTaskList"></ul>
+            <div class="progress">
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                <p class="progress-text" id="progressText">完成进度：0/0</p>
+            </div>
+        </div>
+        
+        <div id="edit-page" class="page">
+            <h3 class="page-title">⚙️ 任务设置</h3>
+            <div id="initSection">
+                <p class="hint">首次使用，请先初始化任务清单</p>
+                <button class="init-btn" onclick="initDefaultTasks()">✅ 一键初始化</button>
+            </div>
+            <div id="editSection" style="display: none;">
+                <div class="edit-day-selector" id="editDaySelector"></div>
+                <h4 id="editDayTitle"></h4>
+                <ul class="edit-task-list" id="editTaskList"></ul>
+                <div class="add-task-container">
+                    <input type="text" id="newTaskInput" placeholder="输入新任务..." onkeypress="if(event.key==='Enter') addTask()">
+                    <button onclick="addTask()">➕ 添加</button>
+                </div>
+                <div class="init-success" id="saveSuccess" style="display: none;">✅ 已保存</div>
+            </div>
+        </div>
+        
+        <div id="history-page" class="page">
+            <h3 class="page-title">📅 历史完成记录</h3>
+            <ul class="history-list" id="historyList"></ul>
+            <div id="historyDetail" style="display: none;">
+                <div class="detail-box">
+                    <h3 id="detailDate"></h3>
+                    <div id="detailTasks"></div>
+                </div>
+                <button class="back-btn" onclick="showHistoryList()">← 返回列表</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
