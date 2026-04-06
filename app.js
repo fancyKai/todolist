@@ -62,13 +62,19 @@ function getDayState(weekday) {
     const storage = getStorage();
     const todayKey = getTodayKey(); // 使用日期作为 key
     if (!storage.history[todayKey]) {
-        storage.history[todayKey] = [];
+        storage.history[todayKey] = { state: [], tasks: [] };
         saveStorage(storage);
     }
-    return storage.history[todayKey];
+    // 兼容旧数据格式
+    const record = storage.history[todayKey];
+    if (Array.isArray(record)) {
+        // 旧格式：直接是数组
+        return record;
+    }
+    return record.state || [];
 }
 
-// 保存某天的完成状态
+// 保存某天的完成状态（同时保存任务列表）
 function saveDayState(weekday, state) {
     const storage = getStorage();
     const todayKey = getTodayKey(); // 使用日期作为 key
@@ -78,7 +84,11 @@ function saveDayState(weekday, state) {
         state.push(false);
     }
     state.length = tasks.length; // 如果任务减少了，截断状态数组
-    storage.history[todayKey] = state;
+    // 保存状态和任务列表
+    storage.history[todayKey] = {
+        state: state,
+        tasks: tasks
+    };
     saveStorage(storage);
 }
 
@@ -328,7 +338,9 @@ function showHistoryList() {
     }
     
     dates.forEach(date => {
-        const state = storage.history[date];
+        const record = storage.history[date];
+        const state = record.state || record; // 兼容旧数据
+        const tasks = record.tasks || [];
         const completed = state.filter(s => s).length;
         const total = state.length;
         const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
@@ -358,7 +370,9 @@ function showHistoryDetail(date) {
     document.getElementById('historyDetail').style.display = 'block';
     
     const storage = getStorage();
-    const state = storage.history[date] || [];
+    const record = storage.history[date] || {};
+    const state = record.state || [];
+    const tasks = record.tasks || [];
     
     // 格式化日期显示
     const dateObj = new Date(date);
@@ -374,9 +388,10 @@ function showHistoryDetail(date) {
     }
     
     state.forEach((done, index) => {
+        const taskName = tasks[index] || `任务 ${index + 1}`;
         const div = document.createElement('div');
         div.className = `detail-task ${done ? 'done' : 'not-done'}`;
-        div.textContent = `${done ? '✓' : '✗'} 任务 ${index + 1}`;
+        div.textContent = `${done ? '✓' : '✗'} ${taskName}`;
         tasksDiv.appendChild(div);
     });
 }
