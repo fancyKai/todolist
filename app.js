@@ -60,18 +60,35 @@ function saveTasks(weekday, tasks) {
 // 获取某天的完成状态
 function getDayState(weekday) {
     const storage = getStorage();
-    if (!storage.history[weekday]) {
-        storage.history[weekday] = [];
+    const todayKey = getTodayKey(); // 使用日期作为 key
+    if (!storage.history[todayKey]) {
+        storage.history[todayKey] = [];
         saveStorage(storage);
     }
-    return storage.history[weekday];
+    return storage.history[todayKey];
 }
 
 // 保存某天的完成状态
 function saveDayState(weekday, state) {
     const storage = getStorage();
-    storage.history[weekday] = state;
+    const todayKey = getTodayKey(); // 使用日期作为 key
+    // 同步 state 数组长度与 tasks 一致
+    const tasks = getTasks(weekday);
+    while (state.length < tasks.length) {
+        state.push(false);
+    }
+    state.length = tasks.length; // 如果任务减少了，截断状态数组
+    storage.history[todayKey] = state;
     saveStorage(storage);
+}
+
+// 获取今天的日期 key (YYYY-MM-DD 格式)
+function getTodayKey() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 // 初始化默认任务
@@ -100,7 +117,16 @@ function initDefaultTasks() {
 function initTodayTasks() {
     const weekday = getTodayWeekday();
     const tasks = getTasks(weekday);
-    const state = getDayState(weekday);
+    let state = getDayState(weekday);
+    
+    // 同步 state 数组长度与 tasks 一致
+    while (state.length < tasks.length) {
+        state.push(false);
+    }
+    if (state.length > tasks.length) {
+        state = state.slice(0, tasks.length);
+        saveDayState(weekday, state);
+    }
     
     const taskList = document.getElementById('todayTaskList');
     taskList.innerHTML = '';
@@ -287,11 +313,14 @@ function showSaveSuccess() {
 // 显示历史列表
 function showHistoryList() {
     document.getElementById('historyDetail').style.display = 'none';
+    document.getElementById('historyList').style.display = 'block';
+    
     const storage = getStorage();
     const historyList = document.getElementById('historyList');
     historyList.innerHTML = '';
     
-    const dates = Object.keys(storage.history).filter(d => d !== 'tasks').sort().reverse();
+    // 获取所有日期 key (YYYY-MM-DD 格式)
+    const dates = Object.keys(storage.history).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort().reverse();
     
     if (dates.length === 0) {
         historyList.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无历史记录</p></div>';
@@ -300,16 +329,20 @@ function showHistoryList() {
     
     dates.forEach(date => {
         const state = storage.history[date];
-        const tasks = getTasks(date);
         const completed = state.filter(s => s).length;
-        const total = tasks.length;
+        const total = state.length;
         const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+        
+        // 格式化日期显示
+        const dateObj = new Date(date);
+        const weekdayIndex = dateObj.getDay();
+        const dateDisplay = `${date} ${WEEKDAYS_CN[weekdayIndex]}`;
         
         const li = document.createElement('li');
         li.className = 'history-item';
         li.onclick = () => showHistoryDetail(date);
         li.innerHTML = `
-            <div class="history-date">${WEEKDAYS_CN[WEEKDAYS.indexOf(date)] || date}</div>
+            <div class="history-date">${dateDisplay}</div>
             <div class="history-stats">
                 <span class="completed">✓ 完成 ${completed}/${total}</span>
                 <span>完成率 ${percent}%</span>
@@ -325,23 +358,25 @@ function showHistoryDetail(date) {
     document.getElementById('historyDetail').style.display = 'block';
     
     const storage = getStorage();
-    const state = storage.history[date];
-    const tasks = getTasks(date);
+    const state = storage.history[date] || [];
     
-    document.getElementById('detailDate').textContent = WEEKDAYS_CN[WEEKDAYS.indexOf(date)] || date;
+    // 格式化日期显示
+    const dateObj = new Date(date);
+    const weekdayIndex = dateObj.getDay();
+    document.getElementById('detailDate').textContent = `${date} ${WEEKDAYS_CN[weekdayIndex]}`;
+    
     const tasksDiv = document.getElementById('detailTasks');
     tasksDiv.innerHTML = '';
     
-    if (tasks.length === 0) {
-        tasksDiv.innerHTML = '<div class="empty-state"><p>暂无任务</p></div>';
+    if (state.length === 0) {
+        tasksDiv.innerHTML = '<div class="empty-state"><p>暂无任务记录</p></div>';
         return;
     }
     
     state.forEach((done, index) => {
-        const task = tasks[index] || '未知任务';
         const div = document.createElement('div');
         div.className = `detail-task ${done ? 'done' : 'not-done'}`;
-        div.textContent = `${done ? '✓' : '✗'} ${task}`;
+        div.textContent = `${done ? '✓' : '✗'} 任务 ${index + 1}`;
         tasksDiv.appendChild(div);
     });
 }
