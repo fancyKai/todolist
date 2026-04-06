@@ -381,12 +381,6 @@ function showHistoryDetail(date) {
     });
 }
 
-// 返回列表
-function showHistoryList() {
-    document.getElementById('historyDetail').style.display = 'none';
-    document.getElementById('historyList').style.display = 'block';
-}
-
 // 放烟花
 function createConfetti() {
     const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
