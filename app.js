@@ -135,8 +135,10 @@ function initTodayTasks() {
     }
     if (state.length > tasks.length) {
         state = state.slice(0, tasks.length);
-        saveDayState(weekday, state);
     }
+    
+    // 确保今天的任务列表也保存到历史记录中
+    saveDayState(weekday, state);
     
     const taskList = document.getElementById('todayTaskList');
     taskList.innerHTML = '';
