@@ -366,11 +366,19 @@ function showHistoryList() {
     });
 }
 
+// 当前正在查看的历史日期
+let currentHistoryDate = null;
+
 // 显示历史详情
 function showHistoryDetail(date) {
+    currentHistoryDate = date;
     document.getElementById('historyList').style.display = 'none';
     document.getElementById('historyDetail').style.display = 'block';
-    
+    renderHistoryDetail(date);
+}
+
+// 渲染历史详情（可提取出来供刷新调用）
+function renderHistoryDetail(date) {
     const storage = getStorage();
     const record = storage.history[date] || {};
     const state = record.state || [];
@@ -389,13 +397,56 @@ function showHistoryDetail(date) {
         return;
     }
     
+    const completed = state.filter(s => s).length;
+    const total = state.length;
+    
+    // 进度条
+    const progressDiv = document.createElement('div');
+    progressDiv.className = 'detail-progress';
+    progressDiv.innerHTML = `
+        <div class="detail-progress-bar"><div class="detail-progress-fill" style="width:${total > 0 ? Math.round((completed / total) * 100) : 0}%"></div></div>
+        <div class="detail-progress-text">完成进度：${completed}/${total}</div>
+    `;
+    tasksDiv.appendChild(progressDiv);
+    
     state.forEach((done, index) => {
         const taskName = tasks[index] || `任务 ${index + 1}`;
         const div = document.createElement('div');
         div.className = `detail-task ${done ? 'done' : 'not-done'}`;
-        div.textContent = `${done ? '✓' : '✗'} ${taskName}`;
+        div.innerHTML = `
+            <span class="detail-task-check">${done ? '✓' : '✗'}</span>
+            <span class="detail-task-name" onclick="toggleHistoryTask(${index})">${taskName}</span>
+            <button class="detail-edit-btn" onclick="editHistoryTask(${index})" title="编辑">✏️</button>
+        `;
         tasksDiv.appendChild(div);
     });
+}
+
+// 切换历史任务完成状态
+function toggleHistoryTask(index) {
+    if (!currentHistoryDate) return;
+    const storage = getStorage();
+    const record = storage.history[currentHistoryDate] || { state: [], tasks: [] };
+    const state = record.state || [];
+    state[index] = !state[index];
+    storage.history[currentHistoryDate].state = state;
+    saveStorage(storage);
+    renderHistoryDetail(currentHistoryDate);
+}
+
+// 编辑历史任务名称
+function editHistoryTask(index) {
+    if (!currentHistoryDate) return;
+    const storage = getStorage();
+    const record = storage.history[currentHistoryDate] || { state: [], tasks: [] };
+    const tasks = record.tasks || [];
+    const oldName = tasks[index] || '';
+    const newName = prompt('修改任务名称：', oldName);
+    if (newName === null) return; // 取消
+    tasks[index] = newName.trim() || oldName;
+    storage.history[currentHistoryDate].tasks = tasks;
+    saveStorage(storage);
+    renderHistoryDetail(currentHistoryDate);
 }
 
 // 放烟花

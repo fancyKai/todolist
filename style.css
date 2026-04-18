@@ -269,11 +269,34 @@ h1 {
     border-radius: 10px;
     margin-bottom: 15px;
 }
+.detail-progress {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eee;
+}
+.detail-progress-bar {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+.detail-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transition: width 0.5s ease;
+}
+.detail-progress-text {
+    text-align: center;
+    font-size: 14px;
+    color: #888;
+}
 .detail-task {
     display: flex;
     align-items: center;
     padding: 8px 0;
     border-bottom: 1px solid #eee;
+    gap: 8px;
 }
 .detail-task:last-child {
     border-bottom: none;
@@ -284,19 +307,36 @@ h1 {
 .detail-task.not-done {
     color: #dc3545;
 }
-.detail-task::before {
-    content: '';
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin-right: 10px;
-    display: inline-block;
+.detail-task-check {
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    font-weight: bold;
 }
-.detail-task.done::before {
-    background: #28a745;
+.detail-task-name {
+    flex: 1;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.2s;
 }
-.detail-task.not-done::before {
-    border: 2px solid #dc3545;
+.detail-task-name:hover {
+    opacity: 0.7;
+}
+.detail-task-name.done-name {
+    text-decoration: line-through;
+}
+.detail-edit-btn {
+    padding: 4px 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+.detail-edit-btn:hover {
+    opacity: 1;
 }
 .back-btn {
     width: 100%;
